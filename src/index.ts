@@ -52,7 +52,6 @@ const vidStorage = multer.diskStorage( {
 const imgUpload = multer({storage: imgStorage})
 const vidUpload = multer({storage: vidStorage})
 
-app.set('port', (process.env.PORT || port));
 app.set('view engine', 'pug');
 
 function authorize(req: express.Request, res: express.Response, next: express.NextFunction) {
