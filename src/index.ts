@@ -5,11 +5,15 @@ import fs = require('fs');
 import path = require('path');
 import http = require('http');
 import https = require('https');
+import {Video} from "./video";
 
 const app = express();
 
 const imgDirectory = 'images/';
 const vidDirectory = 'videos/';
+
+const vidUrl = "https://vid.bergaker.com/"
+const imgUrl = "https://img.bergaker.com/"
 
 const secretKey = fs.readFileSync('secret.key', 'utf8');
 
@@ -72,14 +76,16 @@ app.post('/upload_image',
 	authorize,
 	imgUpload.single('file_image'),
 	(req, res) => {
-		res.type('application/json').send( JSON.stringify({url: "https://img.bergaker.com/" + req.file.filename}));
+		res.type('application/json').send( JSON.stringify({url: imgUrl + req.file.filename}));
 	}
 );
 app.post('/upload_video',
 	authorize,
 	vidUpload.single('file_video'),
-	(req, res) => {
-		res.type('application/json').send( JSON.stringify({url: "https://vid.bergaker.com/" + path.basename(req.file.filename, path.extname(req.file.filename))}));
+	async (req, res) => {
+		const video = new Video();
+		await video.import(vidDirectory + req.file.filename);
+		res.type('application/json').send( JSON.stringify({url: vidUrl + path.basename(video.path)}));
 	}
 );
 
@@ -93,29 +99,39 @@ app.get('*', (req, res) => {
 		const fileId = req.path.replace('/', '');
 		const fullPath = vidDirectory + fileId;
 		const hasExt = path.extname(fullPath) != "";
-		const filePath = hasExt ? fullPath : fullPath + ".mp4";
 
-		if (fs.existsSync(filePath) == false) {
-			res.sendStatus(404);
-			return;
-		}
-
-		// With extension, serve the file itself
+		// If ext just serve the file
 		if (hasExt) {
-			res.contentType('video/' + path.extname(filePath).replace('.', ''));
-			res.end(fs.readFileSync(filePath));
+			if (fs.existsSync(fullPath) == false) {
+				res.sendStatus(404);
+				return;
+			}
+
+			const ext = path.extname(fullPath).replace('.', '');
+			const contentType = ext == '.png' ? 'image' : 'video'
+
+			res.contentType(contentType + '/' + path.extname(fullPath).replace('.', ''));
+			res.end(fs.readFileSync(fullPath));
 		}
-		// If no extension, serve a website to view it
 		else {
-			const query = (req.query.video == "1") ? "?video=1" : ""
-			res.render("video", {
-				fileId: fileId,
-				filePath: fileId + ".mp4" + query,
-				fileExt: "mp4"
+			if (Video.exists(fullPath) == false) {
+				res.sendStatus(404);
+				return;
+			}
+			const video = new Video();
+			video.fromFile(fullPath);
+
+			res.render('video', {
+				fileId: video.id,
+				filePath: vidUrl + path.basename(video.videoPath),
+				fileThumb: vidUrl + path.basename(video.thumbnailPath),
+				fileWidth: video.width,
+				fileHeight: video.height,
+				fileDuration: video.duration,
+				fileGif: vidUrl + path.basename(video.gifPath),
+				fileExt: path.extname(video.videoPath).replace('.', '')
 			})
-
 		}
-
 
 	} else {
 		// look for the file

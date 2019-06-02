@@ -2,7 +2,39 @@ html
 	head
 		title=fileId
 		meta(name='viewport', content='width=device-width, initial-scale=1')
+		meta(charset='utf-8')
+		meta(property='og:type' content='video')
+		meta(property='og:title' content='Recorded video')
+		meta(property='og:image', content=fileGif)
+		meta(property='og:image:width', content=fileWidth)
+		meta(property='og:image:height', content=fileHeight)
+		meta(property='og:image', content=fileThumb)
+		meta(property='og:video' content=filePath)
+		meta(property='og:video:type' content='video/'+fileExt)
+		meta(property='og:video:width', content=fileWidth)
+		meta(property='og:video:height', content=fileHeight)
+		meta(property='og:video:duration', content=fileDuration)
+		link(rel='stylesheet', href='https://use.fontawesome.com/releases/v5.0.13/css/all.css', integrity='sha384-DNOHZ68U8hZfKXOrtjWvjxusGo9WQnrNx2sqG0tfsghAvtVlRW3tvkXWZh58N9jp', crossorigin='anonymous')
+		style
+			include video.css
 	body
-		div(id='video')
-			video(controls)
-				source(src=filePath, type="video/"+fileExt)
+		div(id='header')
+			a(href='https://anton.bergaker.com')
+				h1
+					span(class='first_name')
+						| Anton
+					|  Bergåker
+			p(id='motto') Now without random taglines!
+			div(id='contact_links')
+				a(href='https://twitter.com/DragonCoke')
+					i(class='fab fa-twitter')
+				a(href='https://github.com/AntonBergaker')
+					i(class='fab fa-github')
+				a(href='mailto:anton@bergaker.com')
+					i(class='fas fa-envelope')
+		div(id='container')
+			div(id='video')
+				video(autoplay, muted, loop)
+					source(src=filePath, type='video/'+fileExt)
+		script
+			include video.js
