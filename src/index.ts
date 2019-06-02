@@ -11,22 +11,28 @@ const app = express();
 const imgDirectory = 'images/';
 const vidDirectory = 'videos/';
 
-// Certificate
-const privateKey = fs.readFileSync('/etc/letsencrypt/live/img.bergaker.com/privkey.pem', 'utf8');
-const certificate = fs.readFileSync('/etc/letsencrypt/live/img.bergaker.com/cert.pem', 'utf8');
-const ca = fs.readFileSync('/etc/letsencrypt/live/img.bergaker.com/chain.pem', 'utf8');
+const secretKey = fs.readFileSync('secret.key', 'utf8');
 
-const credentials = {
-	key: privateKey,
-	cert: certificate,
-	ca: ca
-};
+let credentials = undefined;
+
+if (fs.existsSync('/etc/letsencrypt/live/img.bergaker.com/privkey.pem')) {
+	// Certificate
+	const privateKey = fs.readFileSync('/etc/letsencrypt/live/img.bergaker.com/privkey.pem', 'utf8');
+	const certificate = fs.readFileSync('/etc/letsencrypt/live/img.bergaker.com/cert.pem', 'utf8');
+	const ca = fs.readFileSync('/etc/letsencrypt/live/img.bergaker.com/chain.pem', 'utf8');
+
+	credentials = {
+		key: privateKey,
+		cert: certificate,
+		ca: ca
+	};
+}
 
 
 function chooseFilename(directory : string, extension : string) : string {
 	let path;
 	do {
-		path = crypto.randomBytes(3).toString('base64') + extension;
+		path = crypto.randomBytes(3).toString('base64').replace('/', '_').replace('+', '-') + extension;
 	} while(fs.existsSync(directory + path))
 	return path;
 }
@@ -55,7 +61,7 @@ const vidUpload = multer({storage: vidStorage})
 app.set('view engine', 'pug');
 
 function authorize(req: express.Request, res: express.Response, next: express.NextFunction) {
-	if (req.headers.Authorization == "notasecret") {
+	if (req.headers.authorization != secretKey) {
 		res.sendStatus(403);
 	} else {
 		next();
@@ -128,12 +134,15 @@ app.get('*', (req, res) => {
 
 // Starting both http & https servers
 const httpServer = http.createServer(app);
-const httpsServer = https.createServer(credentials, app);
 
 httpServer.listen(80, () => {
 	console.log('HTTP Server running on port 80');
 });
 
-httpsServer.listen(443, () => {
-	console.log('HTTPS Server running on port 443');
-});
+if (credentials != undefined) {
+	const httpsServer = https.createServer(credentials, app);
+	httpsServer.listen(443, () => {
+		console.log('HTTPS Server running on port 443');
+	});
+
+}
