@@ -6,6 +6,12 @@ html
 		meta(property='og:title' content='Recorded video')
 		meta(property='og:video' content=filePath)
 		meta(property='og:video:type' content='video/'+fileExt)
+		meta(property='og:video:width', content=fileWidth)
+		meta(property='og:video:height', content=fileHeight)
+		meta(property='og:video:duration', content=fileDuration)
+		meta(property='og:image', content=fileThumb)
+		meta(property='og:image:width', content=fileWidth)
+		meta(property='og:image:height', content=fileHeight)
 	body
 		div(id='video')
 			video(controls)
