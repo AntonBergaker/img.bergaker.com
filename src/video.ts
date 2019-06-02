@@ -1,13 +1,13 @@
 import fs = require('fs');
 import ffmpeg = require('fluent-ffmpeg');
 import path = require('path');
-import { rejects } from 'assert';
 
 export class Video {
 	public id = "";
 	public videoPath = "";
 	public path = "";
 	public thumbnailPath = "";
+	public gifPath = "";
 	public width = 0;
 	public height = 0;
 	public duration = 0;
@@ -19,6 +19,7 @@ export class Video {
 		this.path = path.dirname(videoPath) + "/" + this.id
 		this.videoPath = videoPath;
 		this.thumbnailPath = this.path + "_thumb.png";
+		this.gifPath = this.path + ".gif";
 
 		const metadata = await Video.getMetadata(videoPath);
 		this.width = metadata["streams"][0]["width"];
@@ -30,6 +31,8 @@ export class Video {
 			filename: this.thumbnailPath
 		})
 
+		Video.makePrettyGif(this.videoPath, this.gifPath);
+
 		this.save();
 	}
 
@@ -37,6 +40,7 @@ export class Video {
 		const json = JSON.parse(fs.readFileSync(path + ".meta", "utf8"));
 		this.id = json.id;
 		this.videoPath = json.video;
+		this.gifPath = json.gif;
 		this.path = path;
 		this.thumbnailPath = json.thumbnail;
 		this.width = json.width;
@@ -54,6 +58,7 @@ export class Video {
 				id: this.id,
 				video: this.videoPath,
 				thumbnail: this.thumbnailPath,
+				gif: this.gifPath,
 				width: this.width,
 				height: this.height,
 				duration: this.duration
@@ -62,7 +67,7 @@ export class Video {
 	}
 
 	private static getMetadata(videoPath : string) : Promise<ffmpeg.FfprobeData> {
-		const promise = new Promise<ffmpeg.FfprobeData>( (resolve, reject) => {
+		return new Promise<ffmpeg.FfprobeData>( (resolve, reject) => {
 			ffmpeg.ffprobe(videoPath, (err, metadata) => {
 				if (err) {
 					reject();
@@ -71,7 +76,16 @@ export class Video {
 			});
 		}
 		);
+	}
 
-		return promise;
+	private static makePrettyGif(videoPath: string, gifPath: string) {
+		const dir = path.dirname(videoPath);
+		const logFunc = function (commandLine : string) {
+			console.log('Spawned ffmpeg with command: ' + commandLine);
+		}
+		const finishFunc = function() {
+			ffmpeg(videoPath).addInput(dir + "/palette.png").complexFilter("[0:v][1:v] paletteuse", []).on("start", logFunc).save(gifPath);
+		}
+		ffmpeg(videoPath).complexFilter("[0:v] palettegen", []).on("end", finishFunc).save(dir+"/palette.png");
 	}
 }
