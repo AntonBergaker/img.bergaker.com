@@ -85,7 +85,7 @@ app.get('*', (req, res) => {
 
 		// With extension, serve the file itself
 		if (hasExt) {
-			res.contentType('video/' + path.extname(filePath));
+			res.contentType('video/' + path.extname(filePath).replace('.', ''));
 			res.end(fs.readFileSync(filePath));
 		}
 		// If no extension, serve a website to view it
@@ -108,11 +108,13 @@ app.get('*', (req, res) => {
 			return;
 		}
 
-		res.contentType('image/' + path.extname(fullPath));
+		res.contentType('image/' + path.extname(fullPath).replace('.', ''));
 		res.end(fs.readFileSync(fullPath));
 	}
 
 
 });
 
-app.listen(80);
+app.use(express.static(__dirname, { dotfiles: 'allow' } ));
+
+app.listen(port);
