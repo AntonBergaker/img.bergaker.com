@@ -128,7 +128,7 @@ app.get('*', (req, res) => {
 				fileWidth: video.width,
 				fileHeight: video.height,
 				fileDuration: video.duration,
-				fileGif: path.basename(video.gifPath),
+				fileGif: vidUrl + path.basename(video.gifPath),
 				fileExt: path.extname(video.videoPath).replace('.', '')
 			})
 		}
