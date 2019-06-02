@@ -5,15 +5,15 @@ html
 		meta(charset='utf-8')
 		meta(property='og:type' content='video')
 		meta(property='og:title' content='Recorded video')
+		meta(property='og:image', content=fileGif)
+		meta(property='og:image:width', content=fileWidth)
+		meta(property='og:image:height', content=fileHeight)
+		meta(property='og:image', content=fileThumb)
 		meta(property='og:video' content=filePath)
 		meta(property='og:video:type' content='video/'+fileExt)
 		meta(property='og:video:width', content=fileWidth)
 		meta(property='og:video:height', content=fileHeight)
 		meta(property='og:video:duration', content=fileDuration)
-		meta(property='og:image', content=fileGif)
-		meta(property='og:image:width', content=fileWidth)
-		meta(property='og:image:height', content=fileHeight)
-		meta(property='og:image', content=fileThumb)
 		link(rel='stylesheet', href='https://use.fontawesome.com/releases/v5.0.13/css/all.css', integrity='sha384-DNOHZ68U8hZfKXOrtjWvjxusGo9WQnrNx2sqG0tfsghAvtVlRW3tvkXWZh58N9jp', crossorigin='anonymous')
 		style
 			include video.css
@@ -33,7 +33,7 @@ html
 				a(href='mailto:anton@bergaker.com')
 					i(class='fas fa-envelope')
 		div(id='container')
-			div(id='video')
+			div(id='video' autoplay)
 				video
 					source(src=filePath, type='video/'+fileExt)
 		script
