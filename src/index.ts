@@ -12,6 +12,9 @@ const app = express();
 const imgDirectory = 'images/';
 const vidDirectory = 'videos/';
 
+const vidUrl = "https://vid.bergaker.com/"
+const imgUrl = "https://img.bergaker.com/"
+
 const secretKey = fs.readFileSync('secret.key', 'utf8');
 
 let credentials = undefined;
@@ -73,7 +76,7 @@ app.post('/upload_image',
 	authorize,
 	imgUpload.single('file_image'),
 	(req, res) => {
-		res.type('application/json').send( JSON.stringify({url: "https://img.bergaker.com/" + req.file.filename}));
+		res.type('application/json').send( JSON.stringify({url: imgUrl + req.file.filename}));
 	}
 );
 app.post('/upload_video',
@@ -82,7 +85,7 @@ app.post('/upload_video',
 	async (req, res) => {
 		const video = new Video();
 		await video.import(vidDirectory + req.file.filename);
-		res.type('application/json').send( JSON.stringify({url: "https://vid.bergaker.com/" + path.basename(video.path)}));
+		res.type('application/json').send( JSON.stringify({url: vidUrl + path.basename(video.path)}));
 	}
 );
 
@@ -120,8 +123,8 @@ app.get('*', (req, res) => {
 
 			res.render('video', {
 				fileId: video.id,
-				filePath: path.basename(video.videoPath),
-				fileThumb: path.basename(video.thumbnailPath),
+				filePath: vidUrl + path.basename(video.videoPath),
+				fileThumb: vidUrl + path.basename(video.thumbnailPath),
 				fileWidth: video.width,
 				fileHeight: video.height,
 				fileDuration: video.duration,
