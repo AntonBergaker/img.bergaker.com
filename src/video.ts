@@ -80,11 +80,9 @@ export class Video {
 
 	private static makePrettyGif(videoPath: string, gifPath: string) {
 		const dir = path.dirname(videoPath);
-		const logFunc = function (commandLine : string) {
-			console.log('Spawned ffmpeg with command: ' + commandLine);
-		}
+
 		const finishFunc = function() {
-			ffmpeg(videoPath).addInput(dir + "/palette.png").complexFilter("[0:v][1:v] paletteuse", []).on("start", logFunc).save(gifPath);
+			ffmpeg(videoPath).addInput(dir + "/palette.png").complexFilter("[0:v][1:v] paletteuse", []).save(gifPath);
 		}
 		ffmpeg(videoPath).complexFilter("[0:v] palettegen", []).on("end", finishFunc).save(dir+"/palette.png");
 	}
