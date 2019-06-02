@@ -2,7 +2,9 @@ html
 	head
 		title=fileId
 		meta(name='viewport', content='width=device-width, initial-scale=1')
+		meta(property='og:video' content=filePath)
+		meta(property='og:video:type' content='video/'+fileExt)
 	body
 		div(id='video')
 			video(controls)
-				source(src=filePath, type="video/"+fileExt)
+				source(src=filePath, type='video/'+fileExt)
